@@ -90,3 +90,27 @@ jobs:
             context: .
             push: true
             tags: ghcr.io/nay43/solar-system-2:${{ github.sha }}
+
+    dev-deploy:
+      runs-on: ubuntu-latest
+      environment:
+        name: development
+      needs: docker
+      steps:
+        - name: Checkout Repo
+          uses: actions/checkout@v4
+
+        - name: Setup kubectl
+          uses: azure/setup-kubectl@v4
+          with:
+             version: 'v1.26.0'
+
+        - name: Setup Kubeconfig file
+          uses: azure/k8s-set-context@v4
+          with:
+            method: kubeconfig
+            kubeconfig: ${{ secrets.KUBECONFIG }}
+
+        - name: Check version
+          run: |
+            kubectl version --short -o yaml
